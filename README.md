@@ -179,3 +179,4 @@ model = torch.load("casme2_cnn.pt")
 ## Tech Stack
 
 Python · FastAPI · Redis · OpenCV · MediaPipe · DeepFace · PyTorch · HuggingFace Transformers · Librosa · React · Vite · Tailwind CSS · Recharts · Zustand · Docker Compose
+
