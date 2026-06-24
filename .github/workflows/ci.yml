@@ -1,0 +1,187 @@
+name: MindTrace++ CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/mindtrace
+
+jobs:
+  # ── Python lint & syntax ──────────────────────────────────────────────────
+  lint-python:
+    name: Lint Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install linting tools
+        run: pip install ruff
+
+      - name: Syntax check (ast)
+        run: |
+          python3 -c "
+          import ast, os, sys
+          errors = []
+          for root, _, files in os.walk('.'):
+              if any(x in root for x in ['node_modules','.git','__pycache__','.venv']): continue
+              for f in files:
+                  if not f.endswith('.py'): continue
+                  path = os.path.join(root, f)
+                  try: ast.parse(open(path).read())
+                  except SyntaxError as e: errors.append(f'{path}: {e}')
+          [print('SYNTAX ERROR:', e) for e in errors]
+          sys.exit(len(errors))
+          "
+
+      - name: Ruff lint
+        run: ruff check backend/ services/ --ignore E501,E402
+
+  # ── Frontend lint & type-check ────────────────────────────────────────────
+  lint-frontend:
+    name: Lint Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+        working-directory: frontend
+
+      - name: Build (type + bundle check)
+        run: npm run build
+        working-directory: frontend
+        env:
+          VITE_API_URL: http://localhost:8000
+          VITE_WS_URL: ws://localhost:8000
+
+  # ── Backend unit tests ────────────────────────────────────────────────────
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install deps
+        run: pip install -r backend/requirements.txt pytest pytest-asyncio httpx
+
+      - name: Run backend tests
+        working-directory: backend
+        run: pytest tests/ -v --tb=short
+        env:
+          REDIS_URL: redis://localhost:6379
+          ML_FACIAL_URL: http://localhost:8001
+          ML_SPEECH_URL: http://localhost:8002
+          ML_TEXT_URL: http://localhost:8003
+          ML_MICRO_URL: http://localhost:8004
+          SECRET_KEY: ci-test-secret
+          ENVIRONMENT: test
+
+  # ── ML service tests ──────────────────────────────────────────────────────
+  test-ml-services:
+    name: ML Service Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [ml-text, ml-micro]   # lightweight; ml-speech/facial tested separately
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install service deps
+        run: pip install -r services/${{ matrix.service }}/requirements.txt pytest httpx requests
+
+      - name: Start service
+        run: |
+          cd services/${{ matrix.service }}
+          python3 -m uvicorn main:app --host 0.0.0.0 --port 8099 --log-level error &
+          sleep 8
+          curl -f http://localhost:8099/health
+
+  # ── Build & push Docker images ────────────────────────────────────────────
+  build-images:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [lint-python, lint-frontend, test-backend]
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        service:
+          - name: api
+            context: ./backend
+          - name: ml-facial
+            context: ./services/ml-facial
+          - name: ml-speech
+            context: ./services/ml-speech
+          - name: ml-text
+            context: ./services/ml-text
+          - name: ml-micro
+            context: ./services/ml-micro
+          - name: frontend
+            context: ./frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service.context }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

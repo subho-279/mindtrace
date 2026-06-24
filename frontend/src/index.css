@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html, body, #root { height: 100%; }
+  body {
+    background-color: #0f1117;
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2a3448; border-radius: 4px; }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface-card border border-surface-border rounded-xl;
+  }
+  .btn-primary {
+    @apply bg-brand-500 hover:bg-brand-600 text-white font-medium px-4 py-2 rounded-lg
+           transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-surface-card hover:bg-surface-hover border border-surface-border
+           text-slate-300 font-medium px-4 py-2 rounded-lg transition-colors duration-150;
+  }
+  .label { @apply text-xs font-medium text-slate-400 uppercase tracking-wider; }
+  .input {
+    @apply w-full bg-surface border border-surface-border rounded-lg px-3 py-2
+           text-sm text-slate-200 placeholder-slate-500 outline-none
+           focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors;
+  }
+}
+
+/* Emotion pill colors */
+.emotion-happy    { color: #fbbf24; }
+.emotion-angry    { color: #f87171; }
+.emotion-sad      { color: #60a5fa; }
+.emotion-fear     { color: #a78bfa; }
+.emotion-disgust  { color: #34d399; }
+.emotion-surprise { color: #fb923c; }
+.emotion-neutral  { color: #94a3b8; }
+.emotion-contempt { color: #f472b6; }
+
+/* Pulse animation for live indicator */
+@keyframes pulse-ring {
+  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 110, 247, 0.5); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 8px rgba(79, 110, 247, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 110, 247, 0); }
+}
+.pulse-live { animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite; }
+
+/* Waveform bars */
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.3); }
+  50%       { transform: scaleY(1); }
+}
+.wave-bar { animation: wave 1.2s ease-in-out infinite; transform-origin: bottom; }
+.wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.wave-bar:nth-child(3) { animation-delay: 0.30s; }
+.wave-bar:nth-child(4) { animation-delay: 0.45s; }
+.wave-bar:nth-child(5) { animation-delay: 0.60s; }
