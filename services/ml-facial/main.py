@@ -46,7 +46,7 @@ def detect_features(img: np.ndarray) -> dict:
     # Use the largest face
     x, y, fw, fh = max(faces, key=lambda r: r[2] * r[3])
     face_roi_gray = gray[y:y+fh, x:x+fw]
-    face_roi_col  = img[y:y+fh, x:x+fw]
+    #face_roi_col  = img[y:y+fh, x:x+fw]
 
     # Eye detection within face ROI (upper half)
     upper = face_roi_gray[:fh//2, :]

@@ -164,7 +164,7 @@ async def predict(
     session_id: str = Form(...),
     fps: float = Form(default=30.0),
 ):
-    start = time.time()
+    #start = time.time()
     data = await file.read()
 
     suffix = os.path.splitext(file.filename or ".mp4")[1] or ".mp4"

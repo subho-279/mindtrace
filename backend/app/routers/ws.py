@@ -56,7 +56,8 @@ async def session_stream(websocket: WebSocket, session_id: str):
 
     try:
         while True:
-            msg = await websocket.receive_text()
+            #msg = await websocket.receive_text()
+            await websocket.receive_text()
             # Client can send {"type":"ping"} to keep alive
     except WebSocketDisconnect:
         pass

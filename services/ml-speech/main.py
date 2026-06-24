@@ -104,7 +104,8 @@ async def predict(file: UploadFile = File(...), session_id: str = Form(...)):
     suffix  = os.path.splitext(file.filename or ".wav")[1] or ".wav"
 
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-        tmp.write(data); tmp_path = tmp.name
+        tmp.write(data)
+        tmp_path = tmp.name
 
     try:
         wav, sr = librosa.load(tmp_path, sr=16000, mono=True)
