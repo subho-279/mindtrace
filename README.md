@@ -1,4 +1,4 @@
-# MindTrace++ 🧠
+# MindTrace
 
 **Multimodal Emotion & Behavioral Intelligence System**
 
