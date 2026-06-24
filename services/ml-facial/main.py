@@ -4,10 +4,12 @@ OpenCV Haar Cascade face/eye/smile detection → geometric ratio classifier.
 Runs fully offline. Swap analyze_frame() for DeepFace/MediaPipe Tasks when
 GitHub releases / Google Storage are accessible from the deployment environment.
 """
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-import numpy as np
+import io
+import time
+
 import cv2
-import io, time
+import numpy as np
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from PIL import Image
 
 app = FastAPI(title="MindTrace++ Facial Emotion Service")

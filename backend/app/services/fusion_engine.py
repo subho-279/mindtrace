@@ -1,5 +1,6 @@
 from collections import defaultdict
-from app.models.emotions import FusedEmotionResult, EmotionScore, Emotion, MicroExpressionEvent
+
+from app.models.emotions import Emotion, EmotionScore, FusedEmotionResult, MicroExpressionEvent
 
 # Confidence weights per modality (tunable)
 MODALITY_WEIGHTS = {

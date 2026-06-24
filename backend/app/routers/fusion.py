@@ -1,12 +1,12 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-import json, time
+import json
+import time
 from collections import defaultdict
 
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
 from app.core.redis import get_redis
-from app.models.emotions import (
-    FusedEmotionResult, EmotionScore, Emotion, BehavioralReport
-)
+from app.models.emotions import BehavioralReport, Emotion, EmotionScore, FusedEmotionResult
 from app.services.fusion_engine import fuse_modalities
 from app.services.report_generator import generate_report
 

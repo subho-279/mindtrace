@@ -4,10 +4,13 @@ Extracts 40-band MFCC, pitch (F0), RMS energy, spectral centroid, ZCR from audio
 Classifies emotion via a calibrated SVM trained on RAVDESS-like feature distributions.
 Swap classifier for Wav2Vec2 fine-tune when HuggingFace Hub is accessible.
 """
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-import numpy as np
+import os
+import tempfile
+import time
+
 import librosa
-import os, time, tempfile
+import numpy as np
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
 app = FastAPI(title="MindTrace++ Speech Emotion Service")
 
@@ -15,9 +18,10 @@ EMOTIONS = ["neutral", "happy", "sad", "angry", "fear", "disgust", "surprise"]
 
 # ── Pre-fit SVM surrogate (weights derived from RAVDESS feature statistics) ───
 # Real approach: joblib.load("ravdess_svm.pkl") — this is the offline equivalent.
-from sklearn.svm import SVC
-from sklearn.preprocessing import StandardScaler
 import pickle
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
 
 _clf   = None
 _scaler = None

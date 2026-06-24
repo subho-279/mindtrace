@@ -1,6 +1,10 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+import json
+import time
+import uuid
+
+import httpx
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
-import httpx, json, uuid, time
 
 from app.core.config import settings
 from app.core.redis import get_redis

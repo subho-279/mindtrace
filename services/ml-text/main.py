@@ -4,10 +4,12 @@ Combines a lexicon-based affective scorer (NRC/ANEW-inspired word lists) with
 TF-IDF + Logistic Regression trained on GoEmotions-like patterns.
 No downloads required. Swap for RoBERTa fine-tune when HF Hub is accessible.
 """
+import re
+import time
+
+import numpy as np
 from fastapi import FastAPI
 from pydantic import BaseModel
-import numpy as np
-import time, re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder

@@ -1,7 +1,11 @@
-import anthropic, json
+import json
 from datetime import datetime, timezone
+
+import anthropic
+
 from app.core.config import settings
 from app.models.emotions import BehavioralReport, FusedEmotionResult
+
 
 async def generate_report(
     session_id: str,

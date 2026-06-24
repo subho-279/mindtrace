@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 
+
 class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379"
     ml_facial_url: str = "http://localhost:8001"

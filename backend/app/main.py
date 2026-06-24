@@ -1,11 +1,13 @@
+from contextlib import asynccontextmanager
+
+import redis.asyncio as aioredis
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-import redis.asyncio as aioredis
 
 from app.core.config import settings
-from app.core.redis import init_redis, close_redis
-from app.routers import facial, speech, text, micro, fusion, session, ws
+from app.core.redis import close_redis, init_redis
+from app.routers import facial, fusion, micro, session, speech, text, ws
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

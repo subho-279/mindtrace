@@ -1,7 +1,11 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+import io
+import os
+import tempfile
+import time
+
 import cv2
 import numpy as np
-import tempfile, os, time, io
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from PIL import Image
 
 app = FastAPI(title="MindTrace++ Micro-Expression Service")

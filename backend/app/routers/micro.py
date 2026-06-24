@@ -1,5 +1,8 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-import httpx, json, uuid
+import json
+import uuid
+
+import httpx
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.core.config import settings
 from app.core.redis import get_redis
